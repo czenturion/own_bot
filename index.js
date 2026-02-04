@@ -1,34 +1,51 @@
-const { default: axios } = require('axios');
-const { Telegraf, Markup } = require('telegraf');
-require('dotenv').config()
+import axios from 'axios';
+import { Telegraf, Markup } from 'telegraf';
+import 'dotenv/config';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start(async (ctx) => {
-    await ctx.reply(ctx.from.first_name + 'Здарова заебал!');
+    await ctx.reply(ctx.from.first_name + ', здарова заебал!');
 
     await ctx.reply('Скинь текущую гео, и получишь там погоду: ',
         Markup.keyboard([
             Markup.button.locationRequest(' 📍 Отправить местоположение ')
         ]).resize()
-    )
+    );
 });
 
-bot.command('/sendLocation', (ctx) => {
-    bot.ctx.telegram.sendLocation()
-})
-bot.on('message', (ctx) => {
-    ctx.reply(ctx.message.from.first_name + " пишет: " + ctx.message.text);
+bot.on('message', async (ctx) => {
     if (ctx.message.location) {
-        if (ctx.message.location) {
-            const weatherUrl = `https://openweathermap.org/data/2.5/weather?lat=${ctx.message.location.latitude}&lon=${ctx.message.location.longitude}&appid=439d4b8O4bc8187953eb36d2a8c26a02`;
+        const lat = ctx.message.location.latitude;
+        const lon = ctx.message.location.longitude;
 
-            const res = axios.get(weatherUrl)
+        const geoUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m&timezone=auto`;
 
-            ctx.reply(weatherUrl)
-        }
+        try {
+            const weatherRes = await axios.get(weatherUrl);
+            const geoRes = await axios.get(geoUrl);
+
+            const address = geoRes.data.address;
+            const locationName = address.city || address.town || address.village || address.municipality || 'вашем районе';
+
+            const current = weatherRes.data.current;
+
+            const weatherMessage = `
+            🌤 Погода в ${locationName}:
+            • Температура сейчас: ${current.temperature_2m}°C
+            • Скорость ветра: ${current.wind_speed_10m} км/ч
+        `;
+
+            ctx.reply(weatherMessage);
+        } catch (e) {
+            console.log('Ошибка при запросе: ', e);
+            ctx.reply('Бля, чет ошибка упала, попробуй позже(');
+        };
+    } else {
+        ctx.reply('Функционал для простых сообщений андер девелопмент...');
     }
-})
+});
 
 bot.launch();
 
