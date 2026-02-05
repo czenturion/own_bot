@@ -44,7 +44,7 @@ bot.on('message', async (ctx) => {
         };
     } else {
         ctx.reply('Функционал для простых сообщений андер девелопмент...');
-    }
+    };
 });
 
 bot.launch();
