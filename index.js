@@ -16,6 +16,7 @@ bot.start(async (ctx) => {
 
 bot.on('message', async (ctx) => {
     if (ctx.message.location) {
+        console.log('гео поолучено')
         const lat = ctx.message.location.latitude;
         const lon = ctx.message.location.longitude;
 
@@ -23,7 +24,9 @@ bot.on('message', async (ctx) => {
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m&timezone=auto`;
 
         try {
+            console.log('запрос погоды')
             const weatherRes = await axios.get(weatherUrl);
+            console.log('декод гео')
             const geoRes = await axios.get(geoUrl);
 
             const address = geoRes.data.address;
