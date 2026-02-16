@@ -15,9 +15,14 @@ bot.start(async (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-    console.log('сообщение получено, начинаем анализировать условия')
+
+    console.log(ctx.message)
+    console.log(JSON.stringify(ctx.message, null, 2))
+
     if (ctx.message.location) {
+
         console.log('гео поолучено')
+
         const lat = ctx.message.location.latitude;
         const lon = ctx.message.location.longitude;
 
