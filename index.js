@@ -14,6 +14,12 @@ bot.start(async (ctx) => {
     );
 });
 
+bot.on('location', async (ctx) => {
+    console.log('получены геоданные')
+
+    await ctx.reply('блок гео отработал')
+})
+
 bot.on('message', async (ctx) => {
 
     console.log(ctx.message)
